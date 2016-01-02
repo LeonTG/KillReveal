@@ -1,11 +1,11 @@
 name: KillReveal
 main: com.leontg77.killreveal.Main
-version: 1.0
+version: 1.0.1
 author: LeonTG77
-description: Plugin for the UHC scenario called Kill Reveal
+description: This gamemode starts out like Secret Teams where no teams are colored but when someone gets a kill however their color is shown on tab you would have to find out teams by people getting kills.
 
 commands:
   killreveal:
-    description: Enable or disable the scenario
+    description: Enable or disable the plugin features.
   random:
-    description: Randomize teams.
+    description: Randomize the teams.
