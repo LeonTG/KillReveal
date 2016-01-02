@@ -1,13 +1,12 @@
 package com.leontg77.killreveal.listeners;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import com.leontg77.killreveal.FakeTeam;
 import com.leontg77.killreveal.Main;
@@ -18,7 +17,6 @@ import com.leontg77.killreveal.Main;
  * @author LeonTG77
  */
 public class KillListener implements Listener {
-	private List<String> hasAKill = new ArrayList<String>();
 	
 	@EventHandler
 	public void on(PlayerDeathEvent event) {
@@ -35,24 +33,15 @@ public class KillListener implements Listener {
 			return;
 		}
 		
-		killer.setPlayerListName(Main.color.get(team) + killer.getName());
-		hasAKill.add(killer.getName());
-	}
-	
-	@EventHandler
-	public void on(PlayerJoinEvent event) {
-		Player player = event.getPlayer();
+		Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+		Team newTeam = board.getTeam("KRTeam" + team.getId());
 		
-		if (!hasAKill.contains(player.getName())) {
-			return;
-		}
-
-		FakeTeam team = Main.getTeam(player);
-		
-		if (team == null) {
-			return;
+		if (newTeam == null) {
+			newTeam = board.registerNewTeam("KRTeam" + team.getId());
 		}
 		
-		player.setPlayerListName(Main.color.get(team) + player.getName());
+		newTeam.addEntry(killer.getName());
+		newTeam.setPrefix(Main.getColor(team));
+		newTeam.setSuffix("§f");
 	}
 }
