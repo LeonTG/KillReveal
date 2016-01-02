@@ -1,16 +1,16 @@
 package com.leontg77.killreveal;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.google.common.collect.ImmutableSet;
 import com.leontg77.killreveal.cmds.KillRevealCommand;
 import com.leontg77.killreveal.cmds.RandomCommand;
 
@@ -20,16 +20,20 @@ import com.leontg77.killreveal.cmds.RandomCommand;
  * @author LeonTG77
  */
 public class Main extends JavaPlugin {
-	public static final String PREFIX = "§c§lKillReveal §8» §7";
+	public static boolean enabled = false;
 	public static Main plugin;
+	
+	public static final String NO_PERM_MSG = "§cYou don't have permission.";
+	public static final String PREFIX = "§c§lKillReveal §8» §7";
 
-	public static List<FakeTeam> teams = new ArrayList<FakeTeam>();
-	public static Map<FakeTeam, String> color = new HashMap<FakeTeam, String>();
-
+	private static Map<FakeTeam, String> colors = new HashMap<FakeTeam, String>();
+	private static List<FakeTeam> teams = new ArrayList<FakeTeam>();
+	
 	@Override
 	public void onDisable() {
 		PluginDescriptionFile file = getDescription();
 		getLogger().info(file.getName() + " is now disabled.");
+		
 		plugin = null;
 	}
 
@@ -38,67 +42,68 @@ public class Main extends JavaPlugin {
 		PluginDescriptionFile file = getDescription();
 		getLogger().info(file.getName() + " v" + file.getVersion() + " is now enabled.");
 		getLogger().info("Plugin made by LeonTG77.");
+		
 		plugin = this;
 
+		// register commands.
 		getCommand("random").setExecutor(new RandomCommand());
 		getCommand("killreveal").setExecutor(new KillRevealCommand());
 	}
-
-	public void addColors() {
-		ArrayList<String> list = new ArrayList<String>();
-
-		list.add(ChatColor.BLACK.toString());
-		list.add(ChatColor.DARK_BLUE.toString());
-		list.add(ChatColor.DARK_GREEN.toString());
-		list.add(ChatColor.DARK_AQUA.toString());
-		list.add(ChatColor.DARK_RED.toString());
-		list.add(ChatColor.DARK_PURPLE.toString());
-		list.add(ChatColor.GOLD.toString());
-		list.add(ChatColor.GRAY.toString());
-		list.add(ChatColor.DARK_GRAY.toString());
-		list.add(ChatColor.BLUE.toString());
-		list.add(ChatColor.GREEN.toString());
-		list.add(ChatColor.AQUA.toString());
-		list.add(ChatColor.RED.toString());
-		list.add(ChatColor.LIGHT_PURPLE.toString());
-		list.add(ChatColor.YELLOW.toString());
-		list.add(ChatColor.WHITE.toString());
-
-		Collections.shuffle(list);
-
-		ArrayList<String> tempList = new ArrayList<String>();
-
-		for (String li : list) {
-			tempList.add(li + ChatColor.ITALIC);
-		}
-
-		for (String li : list) {
-			tempList.add(li + ChatColor.BOLD);
-		}
-
-		for (String li : list) {
-			tempList.add(li + ChatColor.UNDERLINE);
-		}
-
-		for (String li : list) {
-			tempList.add(li + ChatColor.STRIKETHROUGH);
-		}
-
-		tempList.remove(ChatColor.GRAY.toString() + ChatColor.ITALIC.toString());
-
-		list.addAll(tempList);
-
-		for (FakeTeam team : teams) {
-			color.put(team, list.remove(0));
-		}
+	
+	/**
+	 * Register a new fake team.
+	 * 
+	 * @return The fake team created.
+	 */
+	public static FakeTeam registerNewFakeTeam() {
+		FakeTeam team = new FakeTeam(teams.size() + 1);
+		teams.add(team);
+		
+		return team;
 	}
 
+	/**
+	 * Get the fake team for the given player.
+	 * 
+	 * @param player The given player.
+	 * @return The fake team, null if the player isn't in a team.
+	 */
 	public static FakeTeam getTeam(Player player) {
 		for (FakeTeam team : teams) {
 			if (team.hasPlayer(player)) {
 				return team;
 			}
 		}
+		
 		return null;
+	}
+	
+	/**
+	 * Get the color of the given team.
+	 * 
+	 * @param team The team getting for.
+	 * @return The color, null if none.
+	 */
+	public static String getColor(FakeTeam team) {
+		return colors.get(team);
+	}
+	
+	/**
+	 * Set the color of the given team.
+	 * 
+	 * @param team The team setting for.
+	 * @param color The new color.
+	 */
+	public static void setColor(FakeTeam team, String color) {
+		colors.put(team, color);
+	}
+	
+	/**
+	 * Get a Set of all the fake teams.
+	 * 
+	 * @return A set of fake teams.
+	 */
+	public static Set<FakeTeam> getFakeTeams() {
+		return ImmutableSet.copyOf(teams);
 	}
 }
