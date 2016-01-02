@@ -1,0 +1,11 @@
+name: KillReveal
+main: com.leontg77.killreveal.Main
+version: 1.0
+author: LeonTG77
+description: Plugin for the UHC scenario called Kill Reveal
+
+commands:
+  killreveal:
+    description: Enable or disable the scenario
+  random:
+    description: Randomize teams.
