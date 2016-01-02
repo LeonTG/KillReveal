@@ -1,14 +1,13 @@
 package com.leontg77.killreveal.cmds;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 import com.leontg77.killreveal.Main;
+import com.leontg77.killreveal.Utils;
 import com.leontg77.killreveal.listeners.KillListener;
 
 /**
@@ -17,50 +16,50 @@ import com.leontg77.killreveal.listeners.KillListener;
  * @author LeonTG77
  */
 public class KillRevealCommand implements CommandExecutor {
-	private boolean enabled = false;
+	private KillListener listener = new KillListener();
+	
+	private static final String USAGE = Main.PREFIX + "Usage: /killreveal <enable|disable>";
+	private static final String PLUGIN_NAME = "KillReveal";
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (!sender.hasPermission("killreveal.manage")) {
-			sender.sendMessage(ChatColor.RED + "You can't use this command.");
+			sender.sendMessage(Main.NO_PERM_MSG);
 			return true;
 		}
 		
 		if (args.length == 0) {
-			sender.sendMessage(Main.PREFIX + "Usage: /killreveal <enable|disable>");
+			sender.sendMessage(USAGE);
 			return true;
 		}
 		
-		String enable = Main.PREFIX + "KillReveal has been enabled.";
-		String disable = Main.PREFIX + "KillReveal has been disabled.";
-		
 		if (args[0].equalsIgnoreCase("enable")) {
-			if (enabled) {
-				sender.sendMessage(Main.PREFIX + "KillReveal is already enabled.");
+			if (Main.enabled) {
+				sender.sendMessage(Main.PREFIX + PLUGIN_NAME + " is already enabled.");
+				return true;
+			}
+
+			Utils.broadcast(Main.PREFIX + PLUGIN_NAME + " has been enabled.");
+			
+			Bukkit.getPluginManager().registerEvents(listener, Main.plugin);
+			Main.enabled = true;
+			return true;
+		} 
+
+		if (args[0].equalsIgnoreCase("disable")) {
+			if (!Main.enabled) {
+				sender.sendMessage(Main.PREFIX + PLUGIN_NAME + " is not enabled.");
 				return true;
 			}
 			
-			for (Player online : Bukkit.getServer().getOnlinePlayers()) {
-				online.sendMessage(enable);
-			}
+			Utils.broadcast(Main.PREFIX + PLUGIN_NAME + " has been disabled.");
 			
-			Bukkit.getPluginManager().registerEvents(new KillListener(), Main.plugin);
-			enabled = true;
-		} else if (args[0].equalsIgnoreCase("disable")) {
-			if (!enabled) {
-				sender.sendMessage(Main.PREFIX + "KillReveal is not enabled.");
-				return true;
-			}
-			
-			for (Player online : Bukkit.getServer().getOnlinePlayers()) {
-				online.sendMessage(disable);
-			}
-			
-			HandlerList.unregisterAll(Main.plugin);
-			enabled = false;
-		} else {
-			sender.sendMessage(Main.PREFIX + "Usage: /killreveal <enable|disable>");
-		}
+			HandlerList.unregisterAll(listener);
+			Main.enabled = false;
+			return true;
+		} 
+		
+		sender.sendMessage(USAGE);
 		return true;
 	}
 }
